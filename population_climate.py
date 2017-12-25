@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 import csv
 import statsmodels.api as sm
+from sklearn.linear_model import LinearRegression as LinReg
+
 
 
 def main():
@@ -79,6 +81,7 @@ def main():
     group=dft.groupby([times.year]).mean()
     dft=group['AverageTemperature']
     dft=dft[dft.index>1959]
+    dft=dft[dft.index<2013]
     print(dft)
     print('\n')
     """Plot the temperature vs time gragh."""
@@ -94,6 +97,7 @@ def main():
     indarray=[]
     datat=[]
     logistic_judge=[]
+
     """Store all the temperature data of each year in list pl."""
     for index,row in dft.iteritems():
         tl.append(row)
@@ -105,6 +109,7 @@ def main():
             logistic_judge.append(1)
         else:
             logistic_judge.append(0)
+      
     """create index for judge series to use."""
     array=[]
     for i in range(51):
@@ -118,6 +123,7 @@ def main():
     
     '''Logistic regression analysis of dataframe lrdf-
        http://www.powerxing.com/logistic-regression-in-python/'''
+    print(lrdf.head(8))
     print (lrdf.describe())
     print(pd.crosstab(lrdf['Temp increased'],lrdf['Population inc'],rownames=['Temp increased']))
     
@@ -129,6 +135,37 @@ def main():
     logit=sm.Logit(lrdf['Temp increased'],lrdf[train_c])
     result=logit.fit()
     print(result.summary())
+    print('\n')
+    
+    """ LinearRegression analysis of population and temperature
+    http://scikit-learn.org/stable/auto_examples/linear_model/plot_ols.html"""
+    x=dfp.index.values.reshape(-1,1)
+    y=dfp.values
+    lreg=LinReg()
+    lreg.fit(x,y)
+    y_pred=lreg.predict(x)
+    
+    plt.figure()
+    plt.title("Population Linear Regression")
+    plt.scatter(x=x,y=y_pred)
+    plt.scatter(x=x,y=y,c='r')
+    print("Accuracy_Population: "+str(lreg.score(x,y)))
+    print('\n')
+    
+    xt=dft.index.values.reshape(-1,1)
+    yt=dft.values
+    lregt=LinReg()
+    lregt.fit(xt,yt)
+    yt_pred=lregt.predict(xt)
+    
+    plt.figure()
+    plt.title("Temperature Linear Regression")
+    plt.scatter(x=xt,y=yt_pred)
+    plt.scatter(x=xt,y=yt,c='r')
+    print("Accuracy_Temperature: "+str(lregt.score(xt,yt)))
+    
+    
+    
   
     
 '''create a function for later ease of displaying column headers.'''
